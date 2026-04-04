@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Product - Bhola Shop</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  font-family:Arial;
+  margin:0;
+  background:url("https://i.ibb.co/7QpKsCX/shiv.jpg") no-repeat center center/cover;
+}
+
+/* overlay */
+body::before{
+  content:"";
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.6);
+  z-index:-1;
+}
+
+.header{
+  background:#ff3f6c;
+  color:#fff;
+  padding:15px;
+  text-align:center;
+}
+
+.box{
+  background:#ffffffdd;
+  padding:15px;
+  border-radius:15px;
+  margin:15px;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:8px;
+  border:none;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  background:#ff3f6c;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h2>📦 Add Product</h2>
+  <p>Bhola Shop Admin</p>
+</div>
+
+<div class="box">
+
+<input type="text" id="name" placeholder="Product Name">
+<input type="number" id="price" placeholder="Price">
+<input type="text" id="image" placeholder="Image URL">
+
+<button onclick="addProduct()">Add Product</button>
+
+</div>
+
+<script>
+
+const supabase = window.supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+async function addProduct(){
+
+let name = document.getElementById("name").value;
+let price = document.getElementById("price").value;
+let image = document.getElementById("image").value;
+
+if(!name || !price || !image){
+alert("Sab fill kar bhai");
+return;
+}
+
+await supabase.from("products").insert([{
+name: name,
+price: price,
+image: image
+}]);
+
+alert("Product Added ✅");
+
+// clear fields
+document.getElementById("name").value="";
+document.getElementById("price").value="";
+document.getElementById("image").value="";
+}
+
+</script>
+
+</body>
+</html>
