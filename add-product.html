@@ -67,10 +67,7 @@ button{
 
 <input type="text" id="name" placeholder="Product Name">
 <input type="number" id="price" placeholder="Price">
-
-<!-- 🔥 IMAGE UPLOAD -->
 <input type="file" id="imageFile">
-
 <input type="text" id="size" placeholder="Size (S,M,L,XL)">
 <textarea id="desc" placeholder="Product Description"></textarea>
 
@@ -80,9 +77,10 @@ button{
 
 <script>
 
+// ✅ SUPABASE CONNECT (SPACE MAT RAKHNA)
 const supabase = window.supabase.createClient(
-"https://katbdbzoufiblnnsoxkk.supabase.co",
-"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+  "https://katbdbzoufiblnnsoxkk.supabase.co",
+  "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
 async function addProduct(){
@@ -94,47 +92,53 @@ let size = document.getElementById("size").value;
 let desc = document.getElementById("desc").value;
 
 if(!name || !price || !file){
-alert("Name, price, image jaruri hai");
-return;
+  alert("Name, price, image jaruri hai");
+  return;
 }
 
-// 🔥 upload image
 let fileName = Date.now() + "-" + file.name;
 
-let { data, error } = await supabase.storage
-  .from("products") // ⚠️ bucket name
+// 🔥 IMAGE UPLOAD
+const { error: uploadError } = await supabase.storage
+  .from("products")
   .upload(fileName, file);
 
-if(error){
-alert("Image upload failed");
-return;
+if(uploadError){
+  alert("Image upload failed");
+  console.log(uploadError);
+  return;
 }
 
-// 🔥 get public URL
-let { data: urlData } = supabase.storage
+// 🔥 GET IMAGE URL
+const { data: urlData } = supabase.storage
   .from("products")
   .getPublicUrl(fileName);
 
 let imageUrl = urlData.publicUrl;
 
-// 🔥 save product
-await supabase.from("products").insert([{
-name: name,
-price: price,
-image: imageUrl,
-size: size,
-description: desc
+// 🔥 INSERT PRODUCT
+const { error } = await supabase.from("products").insert([{
+  name: name,
+  price: price,
+  image: imageUrl,
+  size: size,
+  description: desc
 }]);
+
+if(error){
+  alert("Insert failed");
+  console.log(error);
+  return;
+}
 
 alert("Product Added ✅");
 
-// clear
+// 🔥 CLEAR FORM
 document.getElementById("name").value="";
 document.getElementById("price").value="";
 document.getElementById("imageFile").value="";
 document.getElementById("size").value="";
 document.getElementById("desc").value="";
-
 }
 
 </script>
