@@ -13,7 +13,6 @@ body{
   background:url("https://i.ibb.co/7QpKsCX/shiv.jpg") no-repeat center center/cover;
 }
 
-/* overlay */
 body::before{
   content:"";
   position:fixed;
@@ -37,7 +36,7 @@ body::before{
   margin:15px;
 }
 
-input{
+input, textarea{
   width:100%;
   padding:12px;
   margin:8px 0;
@@ -70,6 +69,9 @@ button{
 <input type="number" id="price" placeholder="Price">
 <input type="text" id="image" placeholder="Image URL">
 
+<input type="text" id="size" placeholder="Size (S,M,L,XL)">
+<textarea id="desc" placeholder="Product Description"></textarea>
+
 <button onclick="addProduct()">Add Product</button>
 
 </div>
@@ -86,24 +88,30 @@ async function addProduct(){
 let name = document.getElementById("name").value;
 let price = document.getElementById("price").value;
 let image = document.getElementById("image").value;
+let size = document.getElementById("size").value;
+let desc = document.getElementById("desc").value;
 
 if(!name || !price || !image){
-alert("Sab fill kar bhai");
+alert("Name, price, image jaruri hai");
 return;
 }
 
 await supabase.from("products").insert([{
 name: name,
 price: price,
-image: image
+image: image,
+size: size,
+description: desc
 }]);
 
 alert("Product Added ✅");
 
-// clear fields
+// clear
 document.getElementById("name").value="";
 document.getElementById("price").value="";
 document.getElementById("image").value="";
+document.getElementById("size").value="";
+document.getElementById("desc").value="";
 }
 
 </script>
