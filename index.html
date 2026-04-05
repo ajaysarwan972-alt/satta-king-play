@@ -12,8 +12,6 @@ body{
   margin:0;
   background:url("https://i.ibb.co/7QpKsCX/shiv.jpg") no-repeat center center/cover;
 }
-
-/* dark overlay */
 body::before{
   content:"";
   position:fixed;
@@ -22,33 +20,30 @@ body::before{
   background:rgba(0,0,0,0.5);
   z-index:-1;
 }
-
 .header{
   background:#ff3f6c;
   color:#fff;
   padding:15px;
   text-align:center;
 }
-
 .products{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:10px;
   padding:10px;
 }
-
 .card{
   background:#ffffffdd;
   padding:10px;
   border-radius:10px;
   text-align:center;
 }
-
 .card img{
   width:100%;
+  height:150px;
+  object-fit:cover;
   border-radius:10px;
 }
-
 button{
   background:#ff3f6c;
   color:#fff;
@@ -72,22 +67,31 @@ button{
 
 <script>
 
-// ✅ TERA SUPABASE CONNECT
-const supabase = window.supabase.createClient(
-"https://katbdbzoufiblnnsoxkk.supabase.co",
-"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+// ✅ FIXED SUPABASE CLIENT
+const { createClient } = supabase;
+
+const supabaseClient = createClient(
+  "https://katbdbzoufiblnnsoxkk.supabase.co",
+  "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// products load
+// 🔥 LOAD PRODUCTS
 async function loadProducts(){
 
-let { data, error } = await supabase
-.from("products")
-.select("*");
+const { data, error } = await supabaseClient
+  .from("products")
+  .select("*")
+  .order("id", { ascending: false });
 
 if(error){
-alert("Error loading products");
-return;
+  alert("Error loading products");
+  console.log(error);
+  return;
+}
+
+if(!data || data.length === 0){
+  document.getElementById("products").innerHTML = "<h3 style='color:white'>No Products Found</h3>";
+  return;
 }
 
 let html = "";
@@ -95,10 +99,10 @@ let html = "";
 data.forEach(p=>{
 html += `
 <div class="card">
-<img src="${p.image}">
-<h3>${p.name}</h3>
-<h4>₹${p.price}</h4>
-<button onclick='buy(${JSON.stringify(p)})'>Order</button>
+  <img src="${p.image}">
+  <h3>${p.name}</h3>
+  <h4>₹${p.price}</h4>
+  <button onclick='buy(${JSON.stringify(p)})'>Order</button>
 </div>`;
 });
 
@@ -106,9 +110,10 @@ document.getElementById("products").innerHTML = html;
 
 }
 
+// 🔥 LOAD CALL
 loadProducts();
 
-// order page redirect
+// 🔥 ORDER PAGE
 function buy(p){
 localStorage.setItem("product", JSON.stringify(p));
 window.location.href = "order.html";
