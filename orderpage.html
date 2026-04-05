@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+<h2>Order</h2>
+
+<div id="product"></div>
+
+<select id="sizeSelect">
+<option value="">Select Size</option>
+</select>
+
+<input id="name" placeholder="Name"><br>
+<input id="mobile" placeholder="Mobile"><br>
+<input id="pincode" placeholder="Pincode"><br>
+<textarea id="address" placeholder="Address"></textarea><br>
+
+<button onclick="order()">Place Order</button>
+
+<script>
+const { createClient } = supabase;
+
+const db = createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+// product
+let product = JSON.parse(localStorage.getItem("product"));
+
+// show
+document.getElementById("product").innerHTML = `
+<img src="${product.image}" width="100">
+<h3>${product.name}</h3>
+<h4>${product.price}</h4>
+`;
+
+// size dropdown
+if(product.size){
+let arr = product.size.split(",");
+let html = '<option value="">Select Size</option>';
+
+arr.forEach(s=>{
+html += `<option value="${s}">${s}</option>`;
+});
+
+document.getElementById("sizeSelect").innerHTML = html;
+}
+
+// order
+async function order(){
+
+let name = document.getElementById("name").value;
+let mobile = document.getElementById("mobile").value;
+let pincode = document.getElementById("pincode").value;
+let address = document.getElementById("address").value;
+let size = document.getElementById("sizeSelect").value;
+
+if(!name || !mobile || !pincode || !address || !size){
+alert("Sab fill kar");
+return;
+}
+
+await db.from("orders").insert([{
+product_name:product.name,
+price:product.price,
+size:size,
+name:name,
+mobile:mobile,
+pincode:pincode,
+address:address
+}]);
+
+alert("Done");
+}
+</script>
+
+</body>
+</html>
