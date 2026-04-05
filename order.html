@@ -12,8 +12,6 @@ body{
   margin:0;
   background:url("https://i.ibb.co/7QpKsCX/shiv.jpg") no-repeat center center/cover;
 }
-
-/* overlay */
 body::before{
   content:"";
   position:fixed;
@@ -22,30 +20,25 @@ body::before{
   background:rgba(0,0,0,0.6);
   z-index:-1;
 }
-
 .header{
   background:#ff3f6c;
   color:#fff;
   padding:15px;
   text-align:center;
 }
-
 .box{
   background:#ffffffdd;
   padding:15px;
   border-radius:15px;
   margin:15px;
 }
-
 .product{
   text-align:center;
 }
-
 .product img{
   width:100%;
   border-radius:10px;
 }
-
 input, textarea{
   width:100%;
   padding:12px;
@@ -53,7 +46,6 @@ input, textarea{
   border-radius:8px;
   border:none;
 }
-
 button{
   width:100%;
   padding:12px;
@@ -75,7 +67,6 @@ button{
 
 <div class="box">
 
-<!-- product show -->
 <div class="product" id="productBox"></div>
 
 <h3>Enter Details</h3>
@@ -91,25 +82,29 @@ button{
 
 <script>
 
-// supabase connect
-const supabase = window.supabase.createClient(
-"https://katbdbzoufiblnnsoxkk.supabase.co",
-"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+// ✅ FIXED SUPABASE CLIENT
+const { createClient } = supabase;
+
+const supabaseClient = createClient(
+  "https://katbdbzoufiblnnsoxkk.supabase.co",
+  "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// product get
+// 🔥 GET PRODUCT
 const product = JSON.parse(localStorage.getItem("product"));
 
-// show product
+// 🔥 SHOW PRODUCT
 if(product){
 document.getElementById("productBox").innerHTML = `
 <img src="${product.image}">
 <h3>${product.name}</h3>
 <h4>₹${product.price}</h4>
 `;
+}else{
+document.getElementById("productBox").innerHTML = "<h3>No Product Found</h3>";
 }
 
-// order function
+// 🔥 PLACE ORDER
 async function placeOrder(){
 
 let name = document.getElementById("name").value;
@@ -122,7 +117,7 @@ alert("Sab fill kar bhai");
 return;
 }
 
-await supabase.from("orders").insert([{
+const { error } = await supabaseClient.from("orders").insert([{
 product_name: product.name,
 price: product.price,
 name: name,
@@ -133,7 +128,18 @@ status: "pending",
 payment_type: "COD"
 }]);
 
+if(error){
+alert("Order failed ❌");
+console.log(error);
+return;
+}
+
 alert("Order Placed ✅");
+
+// clear product
+localStorage.removeItem("product");
+
+// redirect
 window.location.href = "index.html";
 }
 
