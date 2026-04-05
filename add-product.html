@@ -2,86 +2,31 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Add Product - Bhola Shop</title>
-
+<title>Add Product</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-body{
-  font-family:Arial;
-  margin:0;
-  background:url("https://i.ibb.co/7QpKsCX/shiv.jpg") no-repeat center center/cover;
-}
-body::before{
-  content:"";
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  background:rgba(0,0,0,0.6);
-  z-index:-1;
-}
-.header{
-  background:#ff3f6c;
-  color:#fff;
-  padding:15px;
-  text-align:center;
-}
-.box{
-  background:#ffffffdd;
-  padding:15px;
-  border-radius:15px;
-  margin:15px;
-}
-input, textarea{
-  width:100%;
-  padding:12px;
-  margin:8px 0;
-  border-radius:8px;
-  border:none;
-}
-button{
-  width:100%;
-  padding:12px;
-  background:#ff3f6c;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  font-size:16px;
-}
-</style>
 </head>
 
 <body>
 
-<div class="header">
-  <h2>📦 Add Product</h2>
-  <p>Bhola Shop Admin</p>
-</div>
+<h2>Add Product</h2>
 
-<div class="box">
-<input type="text" id="name" placeholder="Product Name">
-<input type="number" id="price" placeholder="Price">
-<input type="file" id="imageFile">
-<input type="text" id="size" placeholder="Size (S,M,L,XL)">
-<textarea id="desc" placeholder="Product Description"></textarea>
+<input id="name" placeholder="Name"><br>
+<input id="price" type="number" placeholder="Price"><br>
+<input id="imageFile" type="file"><br>
+<input id="size" placeholder="Size (L,XL or M or FREE)"><br>
+<textarea id="desc" placeholder="Description"></textarea><br>
 
-<button onclick="addProduct()">Add Product</button>
-</div>
+<button onclick="addProduct()">Add</button>
 
 <script>
-
-// ✅ FIXED SUPABASE CLIENT
 const { createClient } = supabase;
 
-const supabaseClient = createClient(
-  "https://katbdbzoufiblnnsoxkk.supabase.co",
-  "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+const db = createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// 🔥 FUNCTION
 async function addProduct(){
-
-alert("clicked"); // test
 
 let name = document.getElementById("name").value;
 let price = document.getElementById("price").value;
@@ -89,56 +34,41 @@ let file = document.getElementById("imageFile").files[0];
 let size = document.getElementById("size").value;
 let desc = document.getElementById("desc").value;
 
-if(!name || !price || !file){
-  alert("Name, price, image jaruri hai");
-  return;
+if(!name || !price || !file || !size){
+alert("Sab fill kar");
+return;
 }
 
-let fileName = Date.now() + "-" + file.name;
+// 🔥 size fix
+size = size.replace(/\s+/g,"").toUpperCase();
 
-// 🔥 IMAGE UPLOAD
-const { error: uploadError } = await supabaseClient.storage
-  .from("products")
-  .upload(fileName, file);
+let fileName = Date.now()+"-"+file.name;
+
+// upload
+const { error: uploadError } = await db.storage
+.from("products")
+.upload(fileName, file);
 
 if(uploadError){
-  alert("Image upload failed");
-  console.log(uploadError);
-  return;
+alert("upload fail");
+return;
 }
 
-// 🔥 GET URL
-const { data: urlData } = supabaseClient.storage
-  .from("products")
-  .getPublicUrl(fileName);
+// url
+let { data } = db.storage.from("products").getPublicUrl(fileName);
 
-let imageUrl = urlData.publicUrl;
-
-// 🔥 INSERT
-const { error } = await supabaseClient.from("products").insert([{
-  name: name,
-  price: price,
-  image: imageUrl,
-  size: size,
-  description: desc
+// insert
+await db.from("products").insert([{
+name:name,
+price:price,
+image:data.publicUrl,
+size:size,
+description:desc
 }]);
 
-if(error){
-  alert("Insert failed");
-  console.log(error);
-  return;
+alert("Added");
+
 }
-
-alert("Product Added ✅");
-
-// clear
-document.getElementById("name").value="";
-document.getElementById("price").value="";
-document.getElementById("imageFile").value="";
-document.getElementById("size").value="";
-document.getElementById("desc").value="";
-}
-
 </script>
 
 </body>
