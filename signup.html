@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f2f2f2;
+  text-align:center;
+}
+
+.top{
+  background:red;
+  height:50px;
+}
+
+.logo{
+  margin-top:20px;
+}
+
+.logo img{
+  width:90px;
+  border-radius:50%;
+}
+
+h1{
+  color:red;
+  margin-top:15px;
+}
+
+.container{
+  width:90%;
+  margin:auto;
+}
+
+.input{
+  width:100%;
+  margin:12px 0;
+  padding:15px;
+  border-radius:25px;
+  border:none;
+  box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  font-size:16px;
+}
+
+.btn{
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:30px;
+  background:red;
+  color:#fff;
+  font-size:18px;
+  font-weight:bold;
+  margin-top:15px;
+}
+
+.link{
+  margin-top:15px;
+  color:#333;
+}
+.link span{
+  color:red;
+  font-weight:bold;
+  cursor:pointer;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="top"></div>
+
+<div class="logo">
+  <img src="https://i.imgur.com/2yaf2wb.png">
+</div>
+
+<h1>Create Account</h1>
+
+<div class="container">
+
+<input id="name" class="input" placeholder="Full Name">
+<input id="mobile" class="input" placeholder="Mobile Number">
+<input id="password" type="password" class="input" placeholder="Password">
+
+<!-- OPTIONAL REF -->
+<input id="ref" class="input" placeholder="Referral Code (Optional)">
+
+<button class="btn" onclick="signup()">REGISTER</button>
+
+<p class="link">Already a Member? 
+<span onclick="location.href='index.html'">Login</span>
+</p>
+
+</div>
+
+<script>
+
+// 🔥 REF AUTO CAPTURE (LINK SE)
+let params = new URLSearchParams(window.location.search);
+let autoRef = params.get("ref");
+
+if(autoRef){
+  localStorage.setItem("ref_by", autoRef);
+}
+
+// SUPABASE
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+// SIGNUP
+async function signup(){
+
+let name = document.getElementById("name").value.trim();
+let mobile = document.getElementById("mobile").value.trim();
+let password = document.getElementById("password").value.trim();
+let manualRef = document.getElementById("ref").value.trim();
+
+// 🔥 FINAL REF LOGIC
+let ref_by = manualRef || localStorage.getItem("ref_by") || null;
+
+if(!name || !mobile || !password){
+alert("Sab fill kar");
+return;
+}
+
+// MOBILE DUPLICATE CHECK
+let { data:exist } = await client
+.from("login")
+.select("*")
+.eq("mobile", mobile);
+
+if(exist.length > 0){
+alert("Number already registered");
+return;
+}
+
+// INSERT
+let { error } = await client
+.from("login")
+.insert([{
+  name:name,
+  mobile:mobile,
+  password:password,
+  balance:0,
+  ref_code: mobile,   // apna referral code
+  ref_by: ref_by      // jisne refer kiya
+}]);
+
+if(error){
+alert("Error: " + error.message);
+}else{
+
+alert("Signup Success ✅");
+
+// REF CLEAR
+localStorage.removeItem("ref_by");
+
+location.href="index.html";
+}
+
+}
+
+</script>
+
+</body>
+</html>
